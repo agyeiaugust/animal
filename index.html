@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Animal Kingdom</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo h1 {
+            margin: 0;
+        }
+
+        .top-links a {
+            text-decoration: none;
+            color: white;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+
+        .top-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Content Section */
+        #mainContent {
+            padding: 20px;
+        }
+
+        .sort-options,
+        .filter-options {
+            margin-bottom: 15px;
+        }
+
+        .product-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .product-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .product-details h3 {
+            margin: 10px 0 5px;
+        }
+
+        .product-details p {
+            margin: 5px 0;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .top-links {
+                margin-top: 10px;
+            }
+
+            .top-links a {
+                display: block;
+                margin: 5px 0;
+            }
+        }
+
+        /* Responsive Cart and Checkout */
+        #cartItemsSection, #checkoutFormDetails {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #cartItemsSection .product-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #cartItemsSection .product-item img {
+            width: 80px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="homePage">
+        <header class="top-header">
+            <div class="logo">
+                <h1>The Animal Kingdom</h1>
+            </div>
+
+            <div class="top-links">
+                <a href="#" onclick="showHome()" id="homeLink">Home</a>
+                <a href="#" onclick="showAllDeals()" id="allDealsLink">All Deals</a>
+                <a href="#">Returns and Orders</a>
+                <a href="#" onclick="showCart()">Cart (<span id="cartCount">0</span>)</a>
+            </div>
+        </header>
+
+        <div class="content" id="mainContent">
+            <!-- Home content will be here initially -->
+            <div id="homeContent">
+                <h2>Explore Our Products</h2>
+
+                <!-- Sorting Options -->
+                <div class="sort-options">
+                    <label><input type="radio" name="sort" value="price" onclick="sortProducts('price')"> Sort by Price</label>
+                    <label><input type="radio" name="sort" value="rating" onclick="sortProducts('rating')"> Sort by Rating</label>
+                    <label><input type="radio" name="sort" value="name" onclick="sortProducts('name')"> Sort by Name</label>
+                </div>
+
+                <!-- Filtering Options -->
+                <div class="filter-options">
+                    <label for="categoryFilter">Filter by Category:</label>
+                    <select id="categoryFilter" onchange="filterProducts()">
+                        <option value="all">All</option>
+                        <option value="image">Image</option>
+                        <option value="meat">Meat</option>
+                        <option value="chains">Chains</option>
+                    </select>
+                </div>
+
+                <!-- Product Section -->
+                <section class="product-section" id="productSection">
+                    <!-- Product items will be dynamically loaded here -->
+                </section>
+            </div>
+
+            <!-- Product Details Page (Initially hidden) -->
+            <div id="productDetailsPage" style="display: none;">
+                <!-- Product details will be dynamically loaded here -->
+            </div>
+
+            <!-- Cart Content -->
+            <div id="cartContent" style="display: none;">
+                <h2>Your Cart</h2>
+                <div id="cartItemsSection">
+                    <!-- Cart items will be displayed here -->
+                </div>
+                <button onclick="clearCart()">Clear Cart</button>
+                <button onclick="showHome()">Back to Home</button>
+                <button onclick="proceedToCheckout()">Proceed to Checkout</button>
+            </div>
+
+            <!-- Checkout Form (Initially hidden) -->
+            <div id="checkoutForm" style="display: none;">
+                <h2>Checkout</h2>
+                <form id="checkoutFormDetails">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required><br>
+
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address" required><br>
+
+                    <label for="phone">Phone Number:</label>
+                    <input type="text" id="phone" name="phone" required><br>
+
+                    <button type="submit">Confirm Purchase</button>
+                </form>
+                <button onclick="showCart()">Back to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            {
+                name: 'Dog Image',
+                price: 100.99,
+                description: 'A detailed description of the first product.',
+                image: 'https://via.placeholder.com/250?text=Dog+Image',
+                rating: 4
+            },
+            {
+                name: 'Image Meat',
+                price: 29.99,
+                description: 'A detailed description of the second product.',
+                image: 'https://via.placeholder.com/250?text=Image+Meat',
+                rating: 2.5
+            },
+            {
+                name: 'Chains',
+                price: 25.99,
+                description: 'A detailed description of a wild animal book.',
+                image: 'https://via.placeholder.com/250?text=Chains',
+                rating: 5
+            }
+        ];
+    
+        
+    // Global variables to track cart items and count
+    let cartItems = [];
+    let cartCount = 0;
+
+    // Function to Display Products
+    function displayProducts(productsToDisplay) {
+        const productSection = document.getElementById('productSection');
+        productSection.innerHTML = ''; // Clear existing products
+
+        productsToDisplay.forEach((product, index) => {
+            const productItem = document.createElement('div');
+            productItem.classList.add('product-item');
+            productItem.innerHTML = `
+                <img src="${product.image}" alt="${product.name}" onclick="showProductDetails(${index})">
+                <div class="product-details">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <span class="price">$${product.price}</span>
+                    <p class="rating">Rating: ${'⭐'.repeat(Math.round(product.rating))}</p>
+                </div>
+            `;
+            productSection.appendChild(productItem);
+        });
+    }
+
+    displayProducts(products);
+
+    // Show product details page
+    function showProductDetails(index) {
+        const product = products[index];
+        document.getElementById('homeContent').style.display = 'none'; // Hide Home content
+        document.getElementById('productDetailsPage').style.display = 'block'; // Show Product Details page
+
+        // Display product details
+        const productDetailsPage = document.getElementById('productDetailsPage');
+        productDetailsPage.innerHTML = `
+            <div class="product-details-page">
+                <div class="product-page-container">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <div class="product-details">
+                        <h1>${product.name}</h1>
+                        <p class="rating">${product.rating} out of 5 stars</p>
+                        <p class="price">$${product.price}</p>
+                        <p><strong>Description:</strong> ${product.description}</p>
+                        <button onclick="addToCart(${index})">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to add a product to the cart
+    function addToCart(index) {
+        const product = products[index];
+        cartItems.push(product); // Add product to cart
+        cartCount++; // Increase the cart count
+        document.getElementById('cartCount').textContent = cartCount; // Update the cart count display
+        alert(`${product.name} has been added to your cart!`); // Notification alert
+    }
+
+    function showCart() {
+        document.getElementById('homeContent').style.display = 'none'; 
+        document.getElementById('productDetailsPage').style.display = 'none'; 
+        document.getElementById('cartContent').style.display = 'block'; 
+        displayCartItems();
+    }
+
+    // Function to display cart items
+    function displayCartItems() {
+        const cartItemsSection = document.getElementById('cartItemsSection');
+        cartItemsSection.innerHTML = ''; // Clear existing cart items
+
+        if (cartItems.length === 0) {
+            cartItemsSection.innerHTML = '<p>Your cart is empty.</p>';
+        } else {
+            cartItems.forEach(product => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('product-item');
+                cartItem.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-details">
+                        <h3>${product.name}</h3>
+                        <p class="price">$${product.price}</p>
+                    </div>
+                `;
+                cartItemsSection.appendChild(cartItem);
+            });
+        }
+    }
+
+    // Function to clear the cart
+    function clearCart() {
+        cartItems = [];
+        cartCount = 0;
+        document.getElementById('cartCount').textContent = cartCount;
+        displayCartItems();
+    }
+
+    // Proceed to Checkout page
+    function proceedToCheckout() {
+        document.getElementById('cartContent').style.display = 'none';
+        document.getElementById('checkoutForm').style.display = 'block';
+    }
+
+    // Handle the checkout form submission
+    document.getElementById('checkoutFormDetails')?.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const address = document.getElementById('address').value;
+        const phone = document.getElementById('phone').value;
+
+        // Simulate a confirmation of the purchase
+        alert(`Thank you, ${name}! Your order has been placed. We will deliver it to: ${address}.`);
+
+        // Reset the cart after purchase
+        clearCart();
+
+        // Redirect to home after purchase (or you can show a "thank you" page)
+        showHome();
+    });
+
+    // Go back to home page
+    function showHome() {
+        document.getElementById('homeContent').style.display = 'block';
+        document.getElementById('cartContent').style.display = 'none';
+        document.getElementById('checkoutForm').style.display = 'none';
+    }
+
+    // Function to sort products based on selected option
+    function sortProducts(sortBy) {
+        let sortedProducts = [...products]; // Create a copy of the products array
+
+        if (sortBy === 'price') {
+            sortedProducts.sort((a, b) => a.price - b.price); // Sort by price (low to high)
+        } else if (sortBy === 'rating') {
+            sortedProducts.sort((a, b) => b.rating - a.rating); // Sort by rating (high to low)
+        } else if (sortBy === 'name') {
+            sortedProducts.sort((a, b) => a.name.localeCompare(b.name)); // Sort by name (alphabetically)
+        }
+
+        // Redisplay products with the sorted order
+        displayProducts(sortedProducts);
+    }
+
+    // Function to filter products
+    function filterProducts() {
+        const filterValue = document.getElementById('categoryFilter').value.toLowerCase();
+
+        // Filter the products based on the selected category
+        const filteredProducts = products.filter(product => {
+            if (filterValue === 'all') {
+                return true; // Show all products
+            } else {
+                return product.name.toLowerCase().includes(filterValue);
+            }
+        });
+
+        // Display the filtered products
+        displayProducts(filteredProducts);
+    }
+        // JavaScript code is the same as provided, ensuring functionality is preserved.
+    </script>
+</body>
+</html>
